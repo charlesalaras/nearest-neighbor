@@ -12,7 +12,7 @@ double crossValidation(std::vector<Point*> dataset, std::vector<unsigned int> cu
         int k = 0;
         for(auto comparison: dataset) {
             if(object != comparison) {
-                printf("Ask if %d is nearest neighbor with %d", i, k);
+                printf("Ask if %d is nearest neighbor with %d\n", i, k);
             }
             k++;
         }
