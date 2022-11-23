@@ -12,7 +12,7 @@ struct Point {
         double dist = 0;
         for(auto it: featureSet) {
             double currentSquare = std::fabs(b.features[it] - features[it]);
-            dist += (currentSquare + currentSquare);
+            dist += (currentSquare * currentSquare);
         }
         return std::sqrt(dist);
     }
