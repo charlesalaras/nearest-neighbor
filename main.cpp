@@ -30,7 +30,6 @@ void readFile(std::string file) {
             i++;
         }
         ss.clear();
-        std::cout << "Object: " << dataset.size() << ": " << currPoint->classification << std::endl;
         dataset.push_back(currPoint);
         fin.peek();
     } 
@@ -56,7 +55,10 @@ int main() {
         std::cerr << e.what() << std::endl;
         return 0;
     }
-    //featureSearch(dataset, false);
-    crossValidation(dataset, {}, 0);
+    std::unordered_set<unsigned int> bestSet = featureSearch(dataset, false);
+    std::cout << "BEST SET: " << std::endl;
+    for(auto it: bestSet) std::cout << it << " ";
+    //double accuracy = crossValidation(dataset, {}, 0);
+    //std::cout << "Empty set adding feature 0: " << accuracy << std::endl;
     return 0;
 }

@@ -3,15 +3,16 @@
 #include <unordered_set>
 #include <cmath>
 #include <vector>
+#include <iostream>
 
 struct Point {
     int classification;
     std::vector<double> features;
     // Calculate Euclidean distance in an n-dimensional space
-    double distance(const Point& b, std::unordered_set<unsigned int> featureSet) {
+    double distance(const Point* b, std::unordered_set<unsigned int> featureSet) const {
         double dist = 0;
         for(auto it: featureSet) {
-            double currentSquare = std::fabs(b.features[it] - features[it]);
+            double currentSquare = b->features[it] - features[it];
             dist += (currentSquare * currentSquare);
         }
         return std::sqrt(dist);
