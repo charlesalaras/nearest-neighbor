@@ -5,9 +5,10 @@
 extern unsigned int NUM_FEATURES;
 
 double crossValidation(
-       const std::vector<Point*>& dataset, 
+        const std::vector<Point*>& dataset, 
         const std::unordered_set<unsigned int>& currentSet, 
-        const unsigned int& featureToAdd
+        const unsigned int& featureToAdd,
+        bool direction
         ) {
     // FOR DEBUG - COMMENT WHEN DONE
     // return double(rand()) / double(RAND_MAX);
@@ -35,7 +36,7 @@ double crossValidation(
     return double(correctClassifications) / double(dataset.size());
 }
 // FIXME: DO BACKWARD ELIMINATION TOO
-std::unordered_set<unsigned int> featureSearch(const std::vector<Point*>& data, bool direction) {
+std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vector<Point*>& data, bool direction) {
     std::unordered_set<unsigned int> featureSet = {};
     if(direction) {
         for(unsigned int i = 0; i < NUM_FEATURES; i++) featureSet.insert(i);
@@ -48,7 +49,7 @@ std::unordered_set<unsigned int> featureSearch(const std::vector<Point*>& data, 
         double bestLevelAccuracy = 0;
         for(unsigned int k = 0; k < NUM_FEATURES; k++) {
             if(featureSet.find(k) != featureSet.end()) continue;
-            double accuracy = crossValidation(data, featureSet, k);
+            double accuracy = crossValidation(data, featureSet, k, direction);
             printf("\tConsidering adding the %d feature with accuracy %f\n", k, accuracy);
             if(accuracy > bestLevelAccuracy) {
                 bestLevelAccuracy = accuracy;
@@ -63,5 +64,5 @@ std::unordered_set<unsigned int> featureSearch(const std::vector<Point*>& data, 
             bestFeatureSet = featureSet;
         }
     }
-    return bestFeatureSet;
+    return {bestAccuracy, bestFeatureSet};
 }

@@ -1,5 +1,7 @@
 #include <iostream>
+#include <iomanip>
 #include <sstream>
+#include <chrono>
 #include <fstream>
 #include <stdexcept>
 #include "utility.h"
@@ -55,9 +57,18 @@ int main() {
         std::cerr << e.what() << std::endl;
         return 0;
     }
-    std::unordered_set<unsigned int> bestSet = featureSearch(dataset, false);
+    std::chrono::steady_clock::time_point t1;
+    t1 = std::chrono::steady_clock::now();
+
+    std::pair<double, std::unordered_set<unsigned int>> bestSet = featureSearch(dataset, false);
+
+    auto t2 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
     std::cout << "BEST SET: " << std::endl;
-    for(auto it: bestSet) std::cout << it << " ";
+    for(auto it: bestSet.second) std::cout << it + 1 << " ";
+    std::cout << std::endl;
+    std::cout << "Accuracy: " << std::setprecision(3) << bestSet.first << std::endl;
+    std::cout << "Runtime: " << std::fixed << std::setprecision(1) << time_span.count() << std::endl;
     //double accuracy = crossValidation(dataset, {}, 0);
     //std::cout << "Empty set adding feature 0: " << accuracy << std::endl;
     return 0;
