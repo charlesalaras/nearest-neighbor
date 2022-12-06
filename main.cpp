@@ -39,7 +39,7 @@ void readFile(std::string file) {
         fin.close();
     }
     if(!dataset.empty()) NUM_FEATURES = dataset[0]->features.size();
-    //std::cout << "Processed " << numPoints << " points each with " << NUM_FEATURES << " features." << std::endl;
+    std::cout << "\nThis dataset has  " << NUM_FEATURES << " (not including the class attribute), with " << numPoints << " instances.\n" << std::endl;
 }
 
 int main() {
@@ -57,19 +57,33 @@ int main() {
         std::cerr << e.what() << std::endl;
         return 0;
     }
+    bool direction = false;
+    char userInput;
+    while(1) {
+        std::cout << "Type the number of the algorithm you want to run." << std::endl;
+        std::cout << "1) Forward Selection" << std::endl;
+        std::cout << "2) Backward Elimination" << std::endl;
+        std::cin >> userInput;
+        if(userInput != '1' && userInput != '2') { 
+        std::cout << "Invalid response. Please select again." << std::endl;
+        }
+        else {
+            direction = userInput == '2' ? true : false;
+            break;
+        }
+    }
+
     std::chrono::steady_clock::time_point t1;
     t1 = std::chrono::steady_clock::now();
 
-    std::pair<double, std::unordered_set<unsigned int>> bestSet = featureSearch(dataset, false);
+    std::pair<double, std::unordered_set<unsigned int>> bestSet = featureSearch(dataset, direction);
 
     auto t2 = std::chrono::steady_clock::now();
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-    std::cout << "BEST SET: " << std::endl;
-    for(auto it: bestSet.second) std::cout << it + 1 << " ";
-    std::cout << std::endl;
-    std::cout << "Accuracy: " << std::setprecision(3) << bestSet.first << std::endl;
-    std::cout << "Runtime: " << std::fixed << std::setprecision(1) << time_span.count() << std::endl;
-    //double accuracy = crossValidation(dataset, {}, 0);
-    //std::cout << "Empty set adding feature 0: " << accuracy << std::endl;
+    std::cout << "\nFinished search!! The best feature subset is " << print(bestSet.second);
+    std::cout << ", which has an accuracy of ";
+    std::cout << std::fixed << std::setprecision(1) << bestSet.first * 100 <<  "%" << std::endl;
+    std::cout << "Runtime: " << std::fixed << std::setprecision(1) << time_span.count() << " seconds" << std::endl;
+
     return 0;
 }

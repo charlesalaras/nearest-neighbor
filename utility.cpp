@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <iomanip>
 #include <limits>
 #include "utility.h"
 
@@ -7,7 +8,7 @@ extern unsigned int NUM_FEATURES;
 double crossValidation(
         const std::vector<Point*>& dataset, 
         const std::unordered_set<unsigned int>& currentSet, 
-        const unsigned int& featureToAdd,
+        const int& featureToAdd,
         bool direction
         ) {
     // FOR DEBUG - COMMENT WHEN DONE
@@ -15,7 +16,12 @@ double crossValidation(
     //
     unsigned int correctClassifications = 0;
     std::unordered_set<unsigned int> testFeatureSet = currentSet;
-    testFeatureSet.insert(featureToAdd);
+
+    if(featureToAdd >= 0) {
+        if(!direction) testFeatureSet.insert(featureToAdd);
+        else testFeatureSet.erase(featureToAdd);
+    }
+
     for(unsigned int i = 0; i < dataset.size(); i++) {
         //printf("Looping over i, at the %d location\n", i);
         //printf("The %dth object is in class %d\n", i, dataset[i]->classification);
@@ -40,7 +46,9 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
     std::unordered_set<unsigned int> featureSet = {};
     if(direction) {
         for(unsigned int i = 0; i < NUM_FEATURES; i++) featureSet.insert(i);
-    };
+    }; 
+    std::cout << "Running nearest neighbor with all " << NUM_FEATURES << " features, using \"leaving-one-out\" evaluation, I get an accuracy of " << std::fixed << std::setprecision(1) << crossValidation(data, featureSet, -1, direction) * 100 << "%\n" << std::endl;
+
     unsigned int addedFeature;
     double bestAccuracy = 0;
     std::unordered_set<unsigned int> bestFeatureSet;
@@ -48,21 +56,65 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
         printf("On the %dth level of the search tree\n", i);
         double bestLevelAccuracy = 0;
         for(unsigned int k = 0; k < NUM_FEATURES; k++) {
-            if(featureSet.find(k) != featureSet.end()) continue;
+            if(featureSet.find(k) != featureSet.end() && !direction) continue;
+            else if(featureSet.find(k) == featureSet.end() && direction) continue;
+
             double accuracy = crossValidation(data, featureSet, k, direction);
-            printf("\tConsidering adding the %d feature with accuracy %f\n", k, accuracy);
+            std::cout << "\tUsing feature(s) ";
+
+            if(!direction) std::cout << print(featureSet, k + 1);
+            else std::cout << printErased(featureSet, k + 1);
+
+            std::cout << " accuracy is " << std::fixed << std::setprecision(1) << accuracy * 100 << "%" << std::endl;
+            
             if(accuracy > bestLevelAccuracy) {
                 bestLevelAccuracy = accuracy;
                 addedFeature = k;
             }
         }
-        featureSet.insert(addedFeature);
-        printf("Adding feature %d with accuracy %f\n", addedFeature, bestLevelAccuracy);
+
+        if(!direction) featureSet.insert(addedFeature);
+        else featureSet.erase(addedFeature);
+
+        std::cout << "Feature set " << print(featureSet) << " was best, with accuracy " << std::fixed << std::setprecision(1) << bestLevelAccuracy * 100 << "%" << std::endl;
         if(bestLevelAccuracy > bestAccuracy) {
-            std::cout << "Adding feature " << addedFeature << " gave a better accuracy of " << bestLevelAccuracy << std::endl;
             bestAccuracy = bestLevelAccuracy;
             bestFeatureSet = featureSet;
         }
     }
     return {bestAccuracy, bestFeatureSet};
+}
+
+// Auxiliary print functions
+const std::string print(const std::unordered_set<unsigned int> set) {
+    std::string featureSet = "{";
+    for(auto it: set) featureSet += std::to_string(it + 1) + ", ";
+    if (set.size() != 0) {
+        featureSet.pop_back();
+        featureSet.pop_back();
+    }
+    featureSet += "}";
+    return featureSet;
+}
+
+const std::string print(const std::unordered_set<unsigned int> set, unsigned int end) {
+    std::string featureSet = "{";
+    for(auto it: set) featureSet += std::to_string(it + 1) + ", ";
+    featureSet += std::to_string(end);
+    featureSet += "}";
+    return featureSet;
+}
+
+const std::string printErased(const std::unordered_set<unsigned int> set, unsigned int k) {
+    std::string featureSet = "{";
+    for(auto it: set) {
+        if(it == k) continue;
+        featureSet += std::to_string(it + 1) + ", ";
+    }
+    if (featureSet.size() > 1) {
+        featureSet.pop_back();
+        featureSet.pop_back();
+    }
+    featureSet += "}";
+    return featureSet;
 }
