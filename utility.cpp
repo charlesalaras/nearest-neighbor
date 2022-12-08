@@ -8,7 +8,7 @@ extern unsigned int NUM_FEATURES;
 double crossValidation(
         const std::vector<Point*>& dataset, 
         const std::unordered_set<unsigned int>& currentSet, 
-        const int& featureToAdd,
+        const int& feature,
         bool direction
         ) {
     // FOR DEBUG - COMMENT WHEN DONE
@@ -17,11 +17,10 @@ double crossValidation(
     unsigned int correctClassifications = 0;
     std::unordered_set<unsigned int> testFeatureSet = currentSet;
 
-    if(featureToAdd >= 0) {
-        if(!direction) testFeatureSet.insert(featureToAdd);
-        else testFeatureSet.erase(featureToAdd);
+    if(feature >= 0) {
+        if(!direction) testFeatureSet.insert(feature);
+        else testFeatureSet.erase(feature);
     }
-
     for(unsigned int i = 0; i < dataset.size(); i++) {
         //printf("Looping over i, at the %d location\n", i);
         //printf("The %dth object is in class %d\n", i, dataset[i]->classification);
@@ -49,7 +48,7 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
     }; 
     std::cout << "Running nearest neighbor with all " << NUM_FEATURES << " features, using \"leaving-one-out\" evaluation, I get an accuracy of " << std::fixed << std::setprecision(1) << crossValidation(data, featureSet, -1, direction) * 100 << "%\n" << std::endl;
 
-    unsigned int addedFeature;
+    unsigned int observedFeature;
     double bestAccuracy = 0;
     std::unordered_set<unsigned int> bestFeatureSet;
     for(unsigned int i = 0; i < NUM_FEATURES; i++) {
@@ -57,7 +56,7 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
         double bestLevelAccuracy = 0;
         for(unsigned int k = 0; k < NUM_FEATURES; k++) {
             if(featureSet.find(k) != featureSet.end() && !direction) continue;
-            else if(featureSet.find(k) == featureSet.end() && direction) continue;
+            if(featureSet.find(k) == featureSet.end() && direction) continue;
 
             double accuracy = crossValidation(data, featureSet, k, direction);
             std::cout << "\tUsing feature(s) ";
@@ -69,15 +68,15 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
             
             if(accuracy > bestLevelAccuracy) {
                 bestLevelAccuracy = accuracy;
-                addedFeature = k;
+                observedFeature = k;
             }
         }
 
-        if(!direction) featureSet.insert(addedFeature);
-        else featureSet.erase(addedFeature);
+        if(!direction) featureSet.insert(observedFeature);
+        else featureSet.erase(observedFeature);
 
         std::cout << "Feature set " << print(featureSet) << " was best, with accuracy " << std::fixed << std::setprecision(1) << bestLevelAccuracy * 100 << "%" << std::endl;
-        if(bestLevelAccuracy > bestAccuracy) {
+        if(bestLevelAccuracy >= bestAccuracy) {
             bestAccuracy = bestLevelAccuracy;
             bestFeatureSet = featureSet;
         }
@@ -108,7 +107,7 @@ const std::string print(const std::unordered_set<unsigned int> set, unsigned int
 const std::string printErased(const std::unordered_set<unsigned int> set, unsigned int k) {
     std::string featureSet = "{";
     for(auto it: set) {
-        if(it == k) continue;
+        if(it == k - 1) continue;
         featureSet += std::to_string(it + 1) + ", ";
     }
     if (featureSet.size() > 1) {

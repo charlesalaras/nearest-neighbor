@@ -39,7 +39,7 @@ void readFile(std::string file) {
         fin.close();
     }
     if(!dataset.empty()) NUM_FEATURES = dataset[0]->features.size();
-    std::cout << "\nThis dataset has  " << NUM_FEATURES << " (not including the class attribute), with " << numPoints << " instances.\n" << std::endl;
+    std::cout << "\nThis dataset has " << NUM_FEATURES << " features (not including the class attribute), with " << numPoints << " instances.\n" << std::endl;
 }
 
 int main() {

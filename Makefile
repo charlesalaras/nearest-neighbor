@@ -3,8 +3,8 @@ DEBUG=-g
 TARGET=prog
 CFLAGS=-std=c++11
 
-HEADERS= utility.h point.h
-OBJECTS= main.o
+HEADERS= utility.h
+OBJECTS= main.o utility.o
 
 default: $(TARGET)
 

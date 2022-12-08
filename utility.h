@@ -11,7 +11,7 @@
 double crossValidation(
         const std::vector<Point*>& dataset, 
         const std::unordered_set<unsigned int>& currentSet, 
-        const int& featureToAdd,
+        const int& feature,
         bool direction
         );
 
