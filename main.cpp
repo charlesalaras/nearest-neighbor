@@ -87,7 +87,7 @@ int main() {
     std::cout << std::fixed << std::setprecision(1) << bestSet.first * 100 <<  "%" << std::endl;
     std::cout << "Runtime: " << std::fixed << std::setprecision(1) << time_span.count() << " seconds" << std::endl;
 
-    // Clean up memory.
+    // Clean up memory. If code fails, remove this for loop.
     for(auto it: dataset) {
         delete it;
     }
