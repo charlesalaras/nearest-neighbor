@@ -10,6 +10,8 @@
 unsigned int NUM_FEATURES = 0;
 std::vector<Point*> dataset;
 
+// Function to parse input file by creating a data point with a class and list of features.
+// Also records the max number of features.
 void readFile(std::string file) {
     std::ifstream fin;
     fin.open(file);
@@ -47,7 +49,7 @@ int main() {
     std::cout << "Type in the name of the file to test : ";
     std::string fname;
     std::cin >> fname;
-
+    // Fail gracefully if the file wasn't existent.
     try
     {
         readFile(fname);
@@ -72,7 +74,7 @@ int main() {
             break;
         }
     }
-
+    // Timing functions to output runtime at the end.
     std::chrono::steady_clock::time_point t1;
     t1 = std::chrono::steady_clock::now();
 
@@ -85,5 +87,9 @@ int main() {
     std::cout << std::fixed << std::setprecision(1) << bestSet.first * 100 <<  "%" << std::endl;
     std::cout << "Runtime: " << std::fixed << std::setprecision(1) << time_span.count() << " seconds" << std::endl;
 
+    // Clean up memory.
+    for(auto it: dataset) {
+        delete it;
+    }
     return 0;
 }

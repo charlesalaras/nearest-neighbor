@@ -11,24 +11,20 @@ double crossValidation(
         const int& feature,
         bool direction
         ) {
-    // FOR DEBUG - COMMENT WHEN DONE
-    // return double(rand()) / double(RAND_MAX);
-    //
     unsigned int correctClassifications = 0;
     std::unordered_set<unsigned int> testFeatureSet = currentSet;
-
+    // Insert the feature for testing if forwards, remove if backwards
+    // Negative features denote not to add or remove and test the set as is.
     if(feature >= 0) {
         if(!direction) testFeatureSet.insert(feature);
         else testFeatureSet.erase(feature);
     }
     for(unsigned int i = 0; i < dataset.size(); i++) {
-        //printf("Looping over i, at the %d location\n", i);
-        //printf("The %dth object is in class %d\n", i, dataset[i]->classification);
         double nearestNeighborDist = std::numeric_limits<double>::max();
         int nearestNeighborClass = std::numeric_limits<int>::max();
         for(unsigned int j = 0; j < dataset.size(); j++) {
+            // Ensure that the algorithm does not compare a data point to itself (breaks nearest neighbor)
             if(dataset[i] != dataset[j]) {
-                //printf("Ask if %d is nearest neighbor with %d\n", i, j);
                 double currDist = dataset[i]->distance(dataset[j], testFeatureSet);
                 if(currDist < nearestNeighborDist) {
                     nearestNeighborDist = currDist;
@@ -36,13 +32,15 @@ double crossValidation(
                 }
             }
         }
+        // Check if the current point was correctly classified
         if(nearestNeighborClass == dataset[i]->classification) correctClassifications++;
     }
     return double(correctClassifications) / double(dataset.size());
 }
-// FIXME: DO BACKWARD ELIMINATION TOO
+
 std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vector<Point*>& data, bool direction) {
     std::unordered_set<unsigned int> featureSet = {};
+    // Start with the full data set if backwards
     if(direction) {
         for(unsigned int i = 0; i < NUM_FEATURES; i++) featureSet.insert(i);
     }; 
@@ -55,17 +53,19 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
         printf("On the %dth level of the search tree\n", i);
         double bestLevelAccuracy = 0;
         for(unsigned int k = 0; k < NUM_FEATURES; k++) {
+            // Ensure that the algorithm does not duplicate process features.
             if(featureSet.find(k) != featureSet.end() && !direction) continue;
             if(featureSet.find(k) == featureSet.end() && direction) continue;
 
             double accuracy = crossValidation(data, featureSet, k, direction);
+            // Print some information about the current feature set's accuracy
             std::cout << "\tUsing feature(s) ";
 
             if(!direction) std::cout << print(featureSet, k + 1);
             else std::cout << printErased(featureSet, k + 1);
 
             std::cout << " accuracy is " << std::fixed << std::setprecision(1) << accuracy * 100 << "%" << std::endl;
-            
+            // Store the best accuracy in this level
             if(accuracy > bestLevelAccuracy) {
                 bestLevelAccuracy = accuracy;
                 observedFeature = k;
@@ -76,6 +76,7 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
         else featureSet.erase(observedFeature);
 
         std::cout << "Feature set " << print(featureSet) << " was best, with accuracy " << std::fixed << std::setprecision(1) << bestLevelAccuracy * 100 << "%" << std::endl;
+        // Store the BEST accuracy and feature set of the entire algorithm's lifecycle.
         if(bestLevelAccuracy >= bestAccuracy) {
             bestAccuracy = bestLevelAccuracy;
             bestFeatureSet = featureSet;
@@ -88,6 +89,7 @@ std::pair<double, std::unordered_set<unsigned int>> featureSearch(const std::vec
 const std::string print(const std::unordered_set<unsigned int> set) {
     std::string featureSet = "{";
     for(auto it: set) featureSet += std::to_string(it + 1) + ", ";
+    // Correctly format the string to match brackets.
     if (set.size() != 0) {
         featureSet.pop_back();
         featureSet.pop_back();
@@ -107,6 +109,7 @@ const std::string print(const std::unordered_set<unsigned int> set, unsigned int
 const std::string printErased(const std::unordered_set<unsigned int> set, unsigned int k) {
     std::string featureSet = "{";
     for(auto it: set) {
+        // Check if feature is one that should not be echoed
         if(it == k - 1) continue;
         featureSet += std::to_string(it + 1) + ", ";
     }
